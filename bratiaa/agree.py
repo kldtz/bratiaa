@@ -63,7 +63,7 @@ def _collect_annotators_and_documents(input_gen):
         for ann_file in document.ann_files:
             annotators.add(ann_file.annotator_id)
         documents.append(document.doc_id)
-    return list(annotators), documents
+    return annotators, documents
 
 
 def compute_f1(tp, fp, fn):
@@ -79,11 +79,11 @@ class F1Agreement:
         num_pairs = comb(len(annotators), 2, exact=True)
         # (p, d, c, l) where p := annotator pairs, d := documents, c := counts (tp, fp, fn), l := labels
         self._pdcl = np.zeros((num_pairs, len(documents), 3, len(labels)))
-        self._documents = documents
+        self._documents = list(documents)
         self._doc2idx = {d: i for i, d in enumerate(documents)}
-        self._labels = labels
+        self._labels = list(labels)
         self._label2idx = {l: i for i, l in enumerate(labels)}
-        self._annotators = annotators
+        self._annotators = list(annotators)
         self._pairs = [pair for pair in combinations(annotators, 2)]
         self._pair2idx = {p: i for i, p in enumerate(self._pairs)}
         # add pairs in reverse order (same index)
