@@ -206,10 +206,10 @@ class F1Agreement:
         num_annotators = len(self._annotators)
         f1_matrix = np.zeros((num_annotators, num_annotators))
         annotator2idx = {a: i for i, a in enumerate(self._annotators)}
-        for i, (ann1, ann2) in enumerate(self._pairs):
+        for ann1, ann2 in self._pairs:
             ann1_idx, ann2_idx = annotator2idx[ann1], annotator2idx[ann2]
-            f1_matrix[ann1_idx][ann2_idx] = f1_pairs[i]
-            f1_matrix[ann2_idx][ann1_idx] = f1_pairs[i]
+            f1_matrix[ann1_idx][ann2_idx] = f1_pairs[self._pair2idx[(ann1, ann2)]]
+            f1_matrix[ann2_idx][ann1_idx] = f1_pairs[self._pair2idx[(ann2, ann1)]]
         # perfect diagonal by definition
         for i in range(len(self._annotators)):
             f1_matrix[i][i] = 1
