@@ -258,7 +258,7 @@ def compute_f1_agreement(project_root, input_gen=input_generator, token_func=Non
 
     return F1Agreement(input_gen, sorted(labels), eval_func=eval_func, token_func=token_func,
                        annotators=sorted(annotators),
-                       documents=documents)
+                       documents=sorted(documents))
 
 
 def iaa_report(f1_agreement, precision=3):
