@@ -14,14 +14,18 @@ from bratsubset.projectconfig import ProjectConfiguration
 # attempted division by zero is expected and unproblematic -> NaN
 np.seterr(divide='ignore', invalid='ignore')
 
-AnnFile = namedtuple('AnnFile', ['annotator_id', 'document_id', 'ann_path'])
+AnnFile = namedtuple('AnnFile', ['annotator_id', 'ann_path'])
 
 
 class Document:
-    __slots__ = ['ann_files', 'txt_path']
+    __slots__ = ['ann_files', 'txt_path', 'doc_id']
 
-    def __init__(self, txt_path):
+    def __init__(self, txt_path, doc_id=None):
         self.txt_path = txt_path
+        if doc_id:
+            self.doc_id = doc_id
+        else:
+            self.doc_id = txt_path
         self.ann_files = []
 
 
@@ -34,10 +38,10 @@ def input_generator(root):
     annotators = [subdir.parts[-1] for subdir in root.glob('*/') if subdir.is_dir()]
     assert len(annotators) > 1, 'At least two annotators are necessary to compute agreement!'
     for rel_path in sorted(collect_redundant_files(root, annotators)):
-        document = Document((root / annotators[0] / rel_path).as_posix()[:-3] + 'txt')
+        document = Document((root / annotators[0] / rel_path).as_posix()[:-3] + 'txt', doc_id=rel_path)
         for annotator in annotators:
             ann_path = root / annotator / rel_path
-            document.ann_files.append(AnnFile(annotator, rel_path, ann_path))
+            document.ann_files.append(AnnFile(annotator, ann_path))
         yield document
 
 
@@ -54,12 +58,12 @@ def collect_redundant_files(root, annotators):
 
 
 def _collect_annotators_and_documents(input_gen):
-    annotators, documents = set(), set()
+    annotators, documents = set(), []
     for document in input_gen():
         for ann_file in document.ann_files:
             annotators.add(ann_file.annotator_id)
-            documents.add(ann_file.document_id)
-    return annotators, documents
+        documents.append(document.doc_id)
+    return list(annotators), documents
 
 
 def compute_f1(tp, fp, fn):
@@ -76,11 +80,15 @@ class F1Agreement:
         # (p, d, c, l) where p := annotator pairs, d := documents, c := counts (tp, fp, fn), l := labels
         self._pdcl = np.zeros((num_pairs, len(documents), 3, len(labels)))
         self._documents = documents
+        self._doc2idx = {d: i for i, d in enumerate(documents)}
         self._labels = labels
         self._label2idx = {l: i for i, l in enumerate(labels)}
         self._annotators = annotators
         self._pairs = [pair for pair in combinations(annotators, 2)]
         self._pair2idx = {p: i for i, p in enumerate(self._pairs)}
+        # add pairs in reverse order (same index)
+        for (a1, a2), value in self._pair2idx.copy().items():
+            self._pair2idx[(a2, a1)] = value
         self._eval_func = eval_func  # function used to extract true positives, false positives and false negatives
         self._token_func = token_func  # function used for tokenization
         self._compute_tp_fp_fn(input_gen)
@@ -105,11 +113,13 @@ class F1Agreement:
                 text = read(document.txt_path)
                 tokens = list(self._token_func(text))
                 to = TokenOverlap(text, tokens)
-            for pair_index, (anno_file_1, anno_file_2) in enumerate(combinations(document.ann_files, 2)):
+            for anno_file_1, anno_file_2 in combinations(document.ann_files, 2):
                 tp, fp, fn = self._eval_func(anno_file_1.ann_path, anno_file_2.ann_path, tokens=to)
-                self._increment_counts(tp, pair_index, doc_index, 0)
-                self._increment_counts(fp, pair_index, doc_index, 1)
-                self._increment_counts(fn, pair_index, doc_index, 2)
+                pair_idx = self._pair2idx[(anno_file_1.annotator_id, anno_file_2.annotator_id)]
+                doc_idx = self._doc2idx[document.doc_id]
+                self._increment_counts(tp, pair_idx, doc_idx, 0)
+                self._increment_counts(fp, pair_idx, doc_idx, 1)
+                self._increment_counts(fn, pair_idx, doc_idx, 2)
 
     def _increment_counts(self, annotations, pair, doc, kind):
         for a in annotations:
