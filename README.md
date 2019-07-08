@@ -120,4 +120,4 @@ Be aware that "\[<sub>ORG</sub> Human\] \[<sub>ORG</sub> Rights Watch\]" and "\[
 
 ## License
 
-This software is provided under the [MIT-License](https://github.com/kldtz/bratiaa/blob/master/LICENSE). The code contains a modified subset of brat, which is available under the same permissive [license](https://github.com/nlplab/brat/blob/master/LICENSE.md).
+This software is provided under the [MIT-License](https://github.com/kldtz/bratiaa/blob/master/LICENSE). The code contains a modified subset of brat, which is available under the same permissive [license](https://github.com/kldtz/bratiaa/blob/master/bratiaa/BRAT_LICENSE.md).
