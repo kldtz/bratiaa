@@ -1,6 +1,6 @@
 # bratiaa
 
-Inter-annotator agreement for Brat annotation projects. So far only text-bound annotations are supported, all other annotation types are ignored.
+Inter-annotator agreement for [Brat](https://brat.nlplab.org/) annotation projects. So far only text-bound annotations are supported, all other annotation types are ignored.
 
 ## Installation
 
