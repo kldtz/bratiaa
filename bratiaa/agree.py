@@ -1,9 +1,9 @@
+from functools import partial
 from itertools import combinations
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from functools import partial
 from scipy.special import comb
 from tabulate import tabulate
 
@@ -63,7 +63,7 @@ def _collect_annotators_and_documents(input_gen):
         for ann_file in document.ann_files:
             annotators.add(ann_file.annotator_id)
         documents.append(document.doc_id)
-    return annotators, documents
+    return list(annotators), documents
 
 
 def compute_f1(tp, fp, fn):
@@ -75,6 +75,8 @@ class F1Agreement:
                  documents=None):
         if not (annotators and documents):
             annotators, documents = _collect_annotators_and_documents(input_gen)
+            annotators.sort()
+            documents.sort()
         assert len(annotators) > 1, 'At least two annotators are necessary to compute agreement!'
         num_pairs = comb(len(annotators), 2, exact=True)
         # (p, d, c, l) where p := annotator pairs, d := documents, c := counts (tp, fp, fn), l := labels
