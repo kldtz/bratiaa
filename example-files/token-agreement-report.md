@@ -5,8 +5,8 @@
 ## Project Setup
 
 * 4 annotators: Lisa, Maria, Max, Peter
-* 7 documents: esp.train-doc-100.ann, esp.train-doc-1400.ann, esp.train-doc-29.ann, esp.train-doc-423.ann, esp.train-doc-46.ann, esp.train-doc-503.ann, esp.train-doc-896.ann
-* 4 labels: LOC, MISC, ORG, PER
+* 7 agreement documents
+* 4 labels
 
 ## Agreement per Document
 

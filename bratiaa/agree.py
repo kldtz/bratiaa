@@ -274,8 +274,8 @@ def iaa_report(f1_agreement, precision=3):
 
     print('\n## Project Setup\n')
     print(f'* {len(f1_agreement.annotators)} annotators: {", ".join(f1_agreement.annotators)}')
-    print(f'* {len(f1_agreement.documents)} documents: {", ".join(f1_agreement.documents)}')
-    print(f'* {len(f1_agreement.labels)} labels: {", ".join(f1_agreement.labels)}')
+    print(f'* {len(f1_agreement.documents)} agreement documents')
+    print(f'* {len(f1_agreement.labels)} labels')
 
     print('\n## Agreement per Document\n')
     f1_agreement.print_table('Document', f1_agreement.documents, *f1_agreement.mean_sd_per_document(),
