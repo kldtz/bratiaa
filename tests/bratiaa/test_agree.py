@@ -1,58 +1,45 @@
-from bratiaa.agree import *
-from bratiaa.utils import tokenize
-from functools import partial
 import pytest
 
+from bratiaa.agree import *
+from bratiaa.utils import tokenize
 
-def test_avg_total():
-    root = 'data/agreement/agree-2'
+AGREE_2_ROOT = 'data/agreement/agree-2'
+
+
+@pytest.fixture(scope='module')
+def agree_2():
     labels = ['PER', 'LOC', 'ORG', 'MISC']
 
-    e = F1Agreement(partial(input_generator, root), labels)
+    return F1Agreement(partial(input_generator, AGREE_2_ROOT), labels)
 
-    f1, f1_std = e.mean_sd_total()
+
+def test_avg_total(agree_2):
+    f1, f1_std = agree_2.mean_sd_total()
     assert f1 == pytest.approx(0.787878, 0.0001)
     assert f1_std == 0.0
 
 
-def test_avg_type():
-    root = 'data/agreement/agree-2'
-    labels = ['PER', 'LOC', 'ORG', 'MISC']
-
-    e = F1Agreement(partial(input_generator, root), labels)
-
-    f1, _ = e.mean_sd_per_label()
-    assert f1.shape == (len(e.labels),)
+def test_avg_type(agree_2):
+    f1, _ = agree_2.mean_sd_per_label()
+    assert f1.shape == (len(agree_2.labels),)
 
 
-def test_avg_doc():
-    root = 'data/agreement/agree-2'
-    labels = ['PER', 'LOC', 'ORG', 'MISC']
-
-    e = F1Agreement(partial(input_generator, root), labels)
-
-    f1, _ = e.mean_sd_per_document()
+def test_avg_doc(agree_2):
+    f1, _ = agree_2.mean_sd_per_document()
     assert f1.shape == (2,)
 
 
-def test_one_vs_all_smoke():
-    root = 'data/agreement/agree-2'
-    labels = ['PER', 'LOC', 'ORG', 'MISC']
-
-    e = F1Agreement(partial(input_generator, root), labels)
-    e.mean_sd_total_one_vs_rest('ann-1')
+def test_one_vs_all_smoke(agree_2):
+    agree_2.mean_sd_total_one_vs_rest('ann-1')
 
 
 def test_instance_iaa_report_smoke():
-    root = 'data/agreement/agree-2'
-    iaa_report(compute_f1_agreement(root))
+    iaa_report(compute_f1_agreement(AGREE_2_ROOT))
 
 
 def test_token_iaa_report_smoke():
-    root = 'data/agreement/agree-2'
-    iaa_report(compute_f1_agreement(root, token_func=tokenize))
+    iaa_report(compute_f1_agreement(AGREE_2_ROOT, token_func=tokenize))
 
 
 def test_collect_redundant_files():
-    root = Path('data/agreement/agree-2')
-    assert len(collect_redundant_files(root, ['ann1', 'ann2'])) == 2
+    assert len(collect_redundant_files(Path(AGREE_2_ROOT), ['ann1', 'ann2'])) == 2
