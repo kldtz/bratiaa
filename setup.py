@@ -1,10 +1,16 @@
 from setuptools import setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(name='bratiaa',
-      version='0.1.0',
+      version='0.1.1',
       author='Tobias Kolditz',
       author_email='tbs.kldtz@gmail.com',
       description='Inter-annotator agreement for Brat annotation projects',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
+      url='https://github.com/kldtz/bratiaa',
       packages=['bratiaa', 'bratsubset'],
       install_requires=[
           'filelock',  # imported by bratsubset.annotation.py, but not used here (read-only)

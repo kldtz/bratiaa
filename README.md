@@ -4,10 +4,9 @@ Inter-annotator agreement for [Brat](https://brat.nlplab.org/) annotation projec
 
 ## Installation
 
-Clone the repository. Install the package via pip.
+Install the package via pip.
 
 ```shell
-git clone https://github.com/kldtz/bratiaa.git
 pip install bratiaa
 ```
 
