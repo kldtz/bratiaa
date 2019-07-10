@@ -49,8 +49,7 @@ def _read_token_annotations(ann_path, tokens):
     Yields a new annotation for each token overlapping with an annotation. If annotations are overlapping each other,
     there will be multiple annotations for a single token.
     """
-    with bs.Annotations(ann_path.as_posix(), read_only=True) as annotations:
-        for annotation in annotations.get_textbounds():
-            for start, end in annotation.spans:
-                for ts, te in tokens.overlapping_tokens(start, end):
-                    yield Annotation('T', annotation.type, ((ts, te),))
+    for annotation in set(_read_textbound_annotations(ann_path)):
+        for start, end in annotation.offsets:
+            for ts, te in tokens.overlapping_tokens(start, end):
+                yield Annotation(annotation.type, annotation.label, ((ts, te),))

@@ -104,7 +104,7 @@ For each multiply annotated document, we compute the number of true positives (*
 
 ### Instance-Based Agreement
 
-An annotation instance pertaining to a certain document consists of a label and one or more start-end offset tuples (multiple start-end tuples in the case of discontinuous annotations). Two instances are considered identical if label and offset tuples match.
+An annotation instance pertaining to a certain document consists of a label and one or more start-end offset tuples (multiple start-end tuples in the case of discontinuous annotations). Two instances are considered identical if label and offset tuples match. Identical instances from a single annotator (on the same document) are considered as accidental - only unqiue annotation instances are used for calculating agreement.
 
 ### Token-Based Agreement
 
