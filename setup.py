@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='bratiaa',
-      version='0.0.1',
+      version='0.1.0',
       author='Tobias Kolditz',
       author_email='tbs.kldtz@gmail.com',
       description='Inter-annotator agreement for Brat annotation projects',
