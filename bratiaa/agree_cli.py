@@ -32,7 +32,7 @@ def main():
     if args.silent:
         log_level = logging.ERROR
     logging.basicConfig(level=log_level,
-                        format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+                        format='%(asctime)s - %(message)s')
 
     token_func = None
     if args.tokenize:

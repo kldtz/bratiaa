@@ -4,7 +4,7 @@ import pytest
 
 
 def test_missing_label():
-    with pytest.raises(ValueError, match='Encountered unkown label MISC!.*'):
+    with pytest.raises(KeyError, match='MISC'):
         root = 'data/agreement/agree-2'
         labels = ['PER', 'LOC', 'ORG']  # missing label
         docs = ['esp.train-doc-29.ann', 'esp.train-doc-46.ann']

@@ -1,3 +1,4 @@
+import logging
 from itertools import combinations
 from pathlib import Path
 
@@ -128,10 +129,12 @@ class F1Agreement:
             try:
                 self._pdcl[pair][doc][kind][self._label2idx[a.label]] += 1
             except KeyError:
-                raise ValueError(
-                    f'Encountered unkown label {a.label}! Please make sure that your "annotation.conf" '
+                logging.error(
+                    f'Encountered unknown label "{a.label}"! Please make sure that your "annotation.conf" '
                     f'(https://brat.nlplab.org/configuration.html#annotation-configuration) '
-                    f'is located under the project root and contains an exhaustive list of entities!')
+                    f'is located under the project root and contains an exhaustive list of entities!'
+                )
+                raise
 
     def mean_sd_per_label(self):
         """
