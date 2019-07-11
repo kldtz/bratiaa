@@ -1,9 +1,9 @@
-from functools import partial
 from itertools import combinations
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from functools import partial
 from scipy.special import comb
 from tabulate import tabulate
 
@@ -125,7 +125,13 @@ class F1Agreement:
 
     def _increment_counts(self, annotations, pair, doc, kind):
         for a in annotations:
-            self._pdcl[pair][doc][kind][self._label2idx[a.label]] += 1
+            try:
+                self._pdcl[pair][doc][kind][self._label2idx[a.label]] += 1
+            except KeyError:
+                raise ValueError(
+                    f'Encountered unkown label {a.label}! Please make sure that your "annotation.conf" '
+                    f'(https://brat.nlplab.org/configuration.html#annotation-configuration) '
+                    f'is located under the project root and contains an exhaustive list of entities!')
 
     def mean_sd_per_label(self):
         """
