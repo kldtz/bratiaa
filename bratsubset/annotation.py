@@ -5,14 +5,9 @@
 from __future__ import with_statement
 
 from itertools import chain, takewhile
-from os import close as os_close
-from os.path import join as path_join
 from os.path import splitext
 from re import compile as re_compile
 from re import match as re_match
-from time import time
-
-from filelock import FileLock
 
 from bratsubset.common import ProtocolError
 from bratsubset.message import Messager
@@ -994,72 +989,8 @@ class Annotations(object):
         return self
 
     def __exit__(self, type, value, traceback):
-        # self._file_input.close()
-        if not self._read_only:
-            assert len(self._input_files) == 1, 'more than one valid outfile'
-
-            # We are hitting the disk a lot more than we should here, what we
-            # should have is a modification flag in the object but we can't
-            # due to how we change the annotations.
-
-            out_str = str(self)
-            with open_textfile(self._input_files[0], 'r') as old_ann_file:
-                old_str = old_ann_file.read()
-
-            # Was it changed?
-            if out_str == old_str:
-                # Then just return
-                return
-
-            from bratsubset.config import WORK_DIR
-
-            # Protect the write so we don't corrupt the file
-            with FileLock(path_join(
-                    WORK_DIR, str(hash(self._input_files[0].replace('/', '_'))) + '.lock'
-            )) as lock_file:
-                #from tempfile import NamedTemporaryFile
-                from tempfile import mkstemp
-                # TODO: XXX: Is copyfile really atomic?
-                from shutil import copyfile
-                # XXX: NamedTemporaryFile only supports encoding for Python 3
-                #       so we hack around it.
-                # with NamedTemporaryFile('w', suffix='.ann') as tmp_file:
-                # Grab the filename, but discard the handle
-                tmp_fh, tmp_fname = mkstemp(suffix='.ann')
-                os_close(tmp_fh)
-                try:
-                    with open_textfile(tmp_fname, 'w') as tmp_file:
-                        # XXX: Temporary hack to make sure we don't write corrupted
-                        #       files, but the client will already have the version
-                        #       at this stage leading to potential problems upon
-                        #       the next change to the file.
-                        tmp_file.write(out_str)
-                        tmp_file.flush()
-
-                        try:
-                            with Annotations(tmp_file.name) as ann:
-                                # Move the temporary file onto the old file
-                                copyfile(tmp_file.name, self._input_files[0])
-                                # As a matter of convention we adjust the modified
-                                # time of the data dir when we write to it. This
-                                # helps us to make back-ups
-                                time()
-                                # XXX: Disabled for now!
-                                #utime(DATA_DIR, (now, now))
-                        except Exception as e:
-                            Messager.error(
-                                'ERROR writing changes: generated annotations cannot be read back in!\n(This is almost certainly a system error, please contact the developers.)\n%s' %
-                                e, -1)
-                            raise
-                finally:
-                    try:
-                        from os import remove
-                        remove(tmp_fname)
-                    except Exception as e:
-                        Messager.error(
-                            "Error removing temporary file '%s'" %
-                            tmp_fname)
-            return
+        # assume self._read_only is always true
+        pass
 
     def __in__(self, other):
         # XXX: You should do this one!

@@ -13,7 +13,6 @@ setup(name='bratiaa',
       url='https://github.com/kldtz/bratiaa',
       packages=['bratiaa', 'bratsubset'],
       install_requires=[
-          'filelock',  # imported by bratsubset.annotation.py, but not used here (read-only)
           'numpy',
           'matplotlib',
           'pytest',
