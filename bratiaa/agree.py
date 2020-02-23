@@ -67,8 +67,8 @@ def _collect_annotators_and_documents(input_gen):
     return list(annotators), documents
 
 
-def compute_f1(tp, fp, fn):
-    return (2 * tp) / (2 * tp + fp + fn)
+def compute_f1(tp, total):
+    return (2 * tp) / total
 
 
 class F1Agreement:
@@ -80,8 +80,8 @@ class F1Agreement:
             documents.sort()
         assert len(annotators) > 1, 'At least two annotators are necessary to compute agreement!'
         num_pairs = comb(len(annotators), 2, exact=True)
-        # (p, d, c, l) where p := annotator pairs, d := documents, c := counts (tp, fp, fn), l := labels
-        self._pdcl = np.zeros((num_pairs, len(documents), 3, len(labels)))
+        # (p, d, c, l) where p := annotator pairs, d := documents, c := counts (tp, total = 2*tp+fp+fn), l := labels
+        self._pdcl = np.zeros((num_pairs, len(documents), 2, len(labels)))
         self._documents = list(documents)
         self._doc2idx = {d: i for i, d in enumerate(documents)}
         self._labels = list(labels)
@@ -94,7 +94,7 @@ class F1Agreement:
             self._pair2idx[(a2, a1)] = value
         self._eval_func = eval_func  # function used to extract true positives, false positives and false negatives
         self._token_func = token_func  # function used for tokenization
-        self._compute_tp_fp_fn(input_gen)
+        self._compute_tp_total(input_gen)
 
     @property
     def annotators(self):
@@ -108,7 +108,7 @@ class F1Agreement:
     def labels(self):
         return list(self._labels)
 
-    def _compute_tp_fp_fn(self, input_gen):
+    def _compute_tp_total(self, input_gen):
         for doc_index, document in enumerate(input_gen()):
             assert doc_index < len(self._documents), 'Input generator yields more documents than expected!'
             to = None
@@ -117,12 +117,12 @@ class F1Agreement:
                 tokens = list(self._token_func(text))
                 to = TokenOverlap(text, tokens)
             for anno_file_1, anno_file_2 in combinations(document.ann_files, 2):
-                tp, fp, fn = self._eval_func(anno_file_1.ann_path, anno_file_2.ann_path, tokens=to)
+                tp, exp, pred = self._eval_func(anno_file_1.ann_path, anno_file_2.ann_path, tokens=to)
                 pair_idx = self._pair2idx[(anno_file_1.annotator_id, anno_file_2.annotator_id)]
                 doc_idx = self._doc2idx[document.doc_id]
                 self._increment_counts(tp, pair_idx, doc_idx, 0)
-                self._increment_counts(fp, pair_idx, doc_idx, 1)
-                self._increment_counts(fn, pair_idx, doc_idx, 2)
+                self._increment_counts(exp, pair_idx, doc_idx, 1)
+                self._increment_counts(pred, pair_idx, doc_idx, 1)
 
     def _increment_counts(self, annotations, pair, doc, kind):
         for a in annotations:
@@ -141,7 +141,7 @@ class F1Agreement:
         Mean and standard deviation of all annotator combinations' F1 scores by label.
         """
         pcl = np.sum(self._pdcl, axis=1)  # sum over documents
-        f1_pairs = compute_f1(pcl[:, 0], pcl[:, 1], pcl[:, 2])
+        f1_pairs = compute_f1(pcl[:, 0], pcl[:, 1])
         avg, stddev = self._mean_sd(f1_pairs)
         return avg, stddev
 
@@ -150,7 +150,7 @@ class F1Agreement:
         Mean and standard deviation of all annotator combinations' F1 scores per document.
         """
         pdc = np.sum(self._pdcl, axis=3)  # sum over labels
-        f1_pairs = compute_f1(pdc[:, :, 0], pdc[:, :, 1], pdc[:, :, 2])
+        f1_pairs = compute_f1(pdc[:, :, 0], pdc[:, :, 1])
         avg, stddev = self._mean_sd(f1_pairs)
         return avg, stddev
 
@@ -159,7 +159,7 @@ class F1Agreement:
         Mean and standard deviation of all annotator cominations' F1 scores.
         """
         pc = np.sum(self._pdcl, axis=(1, 3))  # sum over documents and labels
-        f1_pairs = compute_f1(pc[:, 0], pc[:, 1], pc[:, 2])
+        f1_pairs = compute_f1(pc[:, 0], pc[:, 1])
         avg, stddev = self._mean_sd(f1_pairs)
         return avg, stddev
 
@@ -169,7 +169,7 @@ class F1Agreement:
         """
         pcl = np.sum(self._pdcl, axis=1)  # sum over documents
         pcl = pcl[self._pairs_involving(annotator)]
-        f1_pairs = compute_f1(pcl[:, 0], pcl[:, 1], pcl[:, 2])
+        f1_pairs = compute_f1(pcl[:, 0], pcl[:, 1])
         avg, stddev = self._mean_sd(f1_pairs)
         return avg, stddev
 
@@ -179,7 +179,7 @@ class F1Agreement:
         """
         pc = np.sum(self._pdcl, axis=(1, 3))  # sum over documents and labels
         pc = pc[self._pairs_involving(annotator)]
-        f1_pairs = compute_f1(pc[:, 0], pc[:, 1], pc[:, 2])
+        f1_pairs = compute_f1(pc[:, 0], pc[:, 1])
         if len(f1_pairs) > 1:
             avg, stddev = self._mean_sd(f1_pairs)
         else:
@@ -213,7 +213,7 @@ class F1Agreement:
         By definition, the matrix is symmetric and F1 = 1 on the main diagonal.
         """
         pc = np.sum(self._pdcl, axis=(1, 3))  # sum over documents and labels
-        f1_pairs = compute_f1(pc[:, 0], pc[:, 1], pc[:, 2])
+        f1_pairs = compute_f1(pc[:, 0], pc[:, 1])
         num_annotators = len(self._annotators)
         f1_matrix = np.zeros((num_annotators, num_annotators))
         annotator2idx = {a: i for i, a in enumerate(self._annotators)}

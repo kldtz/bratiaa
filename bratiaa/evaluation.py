@@ -12,9 +12,7 @@ def exact_match_instance_evaluation(ann_path_1, ann_path_2, tokens=None):
     exp = set(_read_textbound_annotations(ann_path_1))
     pred = set(_read_textbound_annotations(ann_path_2))
     tp = exp.intersection(pred)
-    fp = pred.difference(exp)
-    fn = exp.difference(pred)
-    return tp, fp, fn
+    return tp, exp, pred
 
 
 def _read_textbound_annotations(ann_path):
@@ -25,17 +23,15 @@ def _read_textbound_annotations(ann_path):
 
 def exact_match_token_evaluation(ann_path_1, ann_path_2, tokens=None):
     """
-    Annotations are split into token-sized bits before true positives, false positives and false negatives are computed.
+    Annotations are split into token-sized bits before evaluation.
 
     Sub-token annotations are expanded to full tokens. Long annotations will influence the results more than short
     annotations. Boundary errors for adjacent annotations with the same label are ignored!
     """
-    exp = Counter(_read_token_annotations(ann_path_1, tokens))
-    pred = Counter(_read_token_annotations(ann_path_2, tokens))
-    tp = counter2list(exp & pred)
-    fp = counter2list(pred - exp)
-    fn = counter2list(exp - pred)
-    return tp, fp, fn
+    exp_list = list(_read_token_annotations(ann_path_1, tokens))
+    pred_list = list(_read_token_annotations(ann_path_2, tokens))
+    tp = counter2list(Counter(exp_list) & Counter(pred_list))
+    return tp, exp_list, pred_list
 
 
 def counter2list(c):
