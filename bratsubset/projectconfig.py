@@ -606,7 +606,8 @@ def get_config_path(directory):
 def __read_first_in_directory_tree(directory, filename):
     # config will not be available command-line invocations;
     # in these cases search whole tree
-    BASE_DIR = "/"
+    import os
+    BASE_DIR = os.sep    # <-- fix to get it working in Windows
     from os.path import split, join
 
     source, result = None, None
