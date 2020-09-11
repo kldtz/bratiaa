@@ -615,7 +615,7 @@ def __read_first_in_directory_tree(directory, filename):
     # check from the given directory and parents, but not above BASE_DIR
     if directory is not None:
         # Another fix for Windows: convert directory to assure 
-        # that Windows path separators are used
+        # that native path separators are used
         from pathlib import Path
         directory = str( Path(directory) )
         # TODO: this check may fail; consider "foo//bar/data"
