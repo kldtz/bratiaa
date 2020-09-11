@@ -19,7 +19,7 @@ setup(name='bratiaa',
           'scipy',
           'tabulate'
       ],
-      python_requires='>=3.5',
+      python_requires='>=3.6',
       entry_points={
           'console_scripts': [
               'brat-iaa=bratiaa.agree_cli:main'
