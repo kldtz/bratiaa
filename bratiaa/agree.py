@@ -54,7 +54,7 @@ def collect_redundant_files(root, annotators):
         if not intersection:
             intersection = relative_paths
         else:
-            intersection.intersection(relative_paths)
+            intersection = intersection.intersection(relative_paths)
     return intersection
 
 
