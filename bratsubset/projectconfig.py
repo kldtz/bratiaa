@@ -604,28 +604,10 @@ def get_config_path(directory):
 
 
 def __read_first_in_directory_tree(directory, filename):
-    # config will not be available command-line invocations;
-    # in these cases search whole tree
-    import os
-    BASE_DIR = os.sep    # <-- fix to get it working in Windows
-    from os.path import split, join
-
-    source, result = None, None
-
-    # check from the given directory and parents, but not above BASE_DIR
-    if directory is not None:
-        # Another fix for Windows: convert directory to assure 
-        # that native path separators are used
-        from pathlib import Path
-        directory = str( Path(directory) )
-        # TODO: this check may fail; consider "foo//bar/data"
-        while BASE_DIR in directory:
-            source = join(directory, filename)
-            result = __read_or_default(source, None)
-            if result is not None:
-                break
-            directory = split(directory)[0]
-
+    # config must be under project root
+    from os.path import join
+    source = join(directory, filename)
+    result = __read_or_default(source, None)
     return (result, source)
 
 
