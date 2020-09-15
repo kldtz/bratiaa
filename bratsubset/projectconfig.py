@@ -605,10 +605,10 @@ def get_config_path(directory):
 
 def __read_first_in_directory_tree(directory, filename):
     # config must be under project root
-    from os.path import join
-    source = join(directory, filename)
+    from pathlib import Path
+    source = str(Path(directory) / filename)
     result = __read_or_default(source, None)
-    return (result, source)
+    return result, source
 
 
 def __parse_configs(configstr, source, expected_sections, optional_sections):
