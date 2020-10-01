@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='bratiaa',
-      version='0.1.3',
+      version='0.1.4',
       author='Tobias Kolditz',
       author_email='tbs.kldtz@gmail.com',
       description='Inter-annotator agreement for Brat annotation projects',
